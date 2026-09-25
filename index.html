@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система управління персоналом (ЗК)</title>
+    <style>
+        :root {
+            --primary-green: #1a8a44;
+            --primary-hover: #146c35;
+            --bg-light: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --accent-orange: #f39c12;
+            --accent-blue: #2980b9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Навигация / Роли */
+        header {
+            background-color: #ffffff;
+            border-bottom: 2px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-green);
+        }
+
+        .role-switcher {
+            display: flex;
+            gap: 10px;
+        }
+
+        .role-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--primary-green);
+            background-color: #fff;
+            color: var(--primary-green);
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .role-btn.active, .role-btn:hover {
+            background-color: var(--primary-green);
+            color: #fff;
+        }
+
+        /* Контейнер страниц */
+        main {
+            flex: 1;
+            max-width: 1000px;
+            width: 100%;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .view-section {
+            display: none;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-bottom: 2px solid var(--bg-light);
+            padding-bottom: 10px;
+        }
+
+        /* Формы и кнопки */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .btn-action {
+            background-color: var(--primary-green);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .btn-action:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Карточки и Списки */
+        .card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-info p {
+            margin: 3px 0;
+            font-size: 14px;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            display: inline-block;
+        }
+
+        .badge-pending { background-color: var(--accent-orange); }
+        .badge-success { background-color: var(--primary-green); }
+        .badge-info { background-color: var(--accent-blue); }
+
+        .btn-secondary {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Выделенные блоки успеха */
+        .success-box {
+            background-color: #e8f8f5;
+            border: 1px solid var(--primary-green);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">Портал замовлень персоналу (ЗК)</div>
+        <div class="role-switcher">
+            <button class="role-btn active" onclick="switchRole('client')">Зовнішній клієнт</button>
+            <button class="role-btn" onclick="switchRole('manager')">Менеджер</button>
+            <button class="role-btn" onclick="switchRole('worker')">Виконавець</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- 1. ИНТЕРФЕЙС ЗОВНІШНЬОГО КЛІЄНТА -->
+        <section id="view-client" class="view-section active">
+            <h2>03. Створення заявки на персонал</h2>
+            
+            <form id="clientForm" onsubmit="handleClientSubmit(event)">
+                <div class="form-group">
+                    <label>Тип створення</label>
+                    <select id="requestType">
+                        <option value="Проста заявка">Проста заявка (швидке оформлення)</option>
+                        <option value="Через Офер">Через Офер (за шаблоном)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Період потреби (днів)</label>
+                    <select id="period">
+                        <option value="1 день">1 день</option>
+                        <option value="2 дні">2 дні</option>
+                        <option value="3 дні">3 дні</option>
+                        <option value="7 днів">7 днів (1 тиждень)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Локація</label>
+                    <input type="text" id="location" placeholder="Наприклад: ЄРЦ, Трикутник..." required>
+                </div>
+
+                <div class="form-group">
+                    <label>Посада</label>
+                    <select id="position">
+                        <option value="Вантажник">Вантажник</option>
+                        <option value="Операціоніст">Операціоніст</option>
+                        <option value="Комплектувальник">Комплектувальник</option>
+                        <option value="Інше">Інше</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Кількість людей</label>
+                    <input type="number" id="peopleCount" min="1" value="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Коментарі</label>
+                    <textarea id="comments" rows="2" placeholder="Додаткова інформація..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-action">Надіслати заявку</button>
+            </form>
+
+            <div id="clientSuccess" style="display: none;" class="success-box">
+                <h3>Заявку створено та передано менеджеру!</h3>
+                <p id="clientSummary"></p>
+            </div>
+
+            <h3 style="margin-top: 30px;">Мої заявки</h3>
+            <div id="clientRequestsList" class="card-list">
+                <!-- Динамический список -->
+            </div>
+        </section>
+
+        <!-- 2. ИНТЕРФЕЙС МЕНЕДЖЕРА -->
+        <section id="view-manager" class="view-section">
+            <h2>02. Головне меню менеджера</h2>
+            <p style="margin-bottom: 15px;">Управління заявками, резервами та формування персоналу.</p>
+            
+            <div class="card-list" id="managerRequestsList">
+                <!-- Заявки клиентов будут тут -->
+            </div>
+        </section>
+
+        <!-- 3. ИНТЕРФЕЙС ВИКОНАВЦЯ -->
+        <section id="view-worker" class="view-section">
+            <h2>04. Меню виконавця</h2>
+            
+            <h3>Доступні заявки для відгуку</h3>
+            <div class="card-list" id="workerAvailableList">
+                <!-- Активные заявки -->
+            </div>
+
+            <h3 style="margin-top: 30px;">Мої резерви / Підтверджені виходи</h3>
+            <div class="card-list" id="workerMyReservesList">
+                <!-- Отклики -->
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // База данных в памяти браузера (State)
+        let state = {
+            requests: [
+                {
+                    id: 1256,
+                    type: "Проста заявка",
+                    period: "7 днів",
+                    location: "ЄРЦ",
+                    position: "Операціоніст",
+                    count: 5,
+                    status: "В обробці",
+                    assignedWorkers: ["Іваненко Іван (067 123 45 67)", "Петренко Олена (099 234 56 78)"]
+                }
+            ],
+            workerResponses: []
+        };
+
+        // Переключение между вкладками (ролями)
+        function switchRole(role) {
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+
+            if (role === 'client') {
+                document.querySelectorAll('.role-btn')[0].classList.add('active');
+                document.getElementById('view-client').classList.add('active');
+                renderClientList();
+            } else if (role === 'manager') {
+                document.querySelectorAll('.role-btn')[1].classList.add('active');
+                document.getElementById('view-manager').classList.add('active');
+                renderManagerList();
+            } else if (role === 'worker') {
+                document.querySelectorAll('.role-btn')[2].classList.add('active');
+                document.getElementById('view-worker').classList.add('active');
+                renderWorkerList();
+            }
+        }
+
+        // 1. Логика Клиента
+        function handleClientSubmit(e) {
+            e.preventDefault();
+            const newReq = {
+                id: Math.floor(1000 + Math.random() * 9000),
+                type: document.getElementById('requestType').value,
+                period: document.getElementById('period').value,
+                location: document.getElementById('location').value,
+                position: document.getElementById('position').value,
+                count: document.getElementById('peopleCount').value,
+                status: "В обробці",
+                assignedWorkers: []
+            };
+
+            state.requests.unshift(newReq);
+            
+            document.getElementById('clientSuccess').style.display = 'block';
+            document.getElementById('clientSummary').innerText = 
+                `Номер заявки: #${newReq.id} | Посада: ${newReq.position} | Локація: ${newReq.location} | Період: ${newReq.period}`;
+            
+            document.getElementById('clientForm').reset();
+            renderClientList();
+        }
+
+        function renderClientList() {
+            const list = document.getElementById('clientRequestsList');
+            list.innerHTML = '';
+            state.requests.forEach(req => {
+                list.innerHTML += `
+                    <div class="card">
+                        <div class="card-info">
+                            <strong>Заявка #${req.id} (${req.position})</strong>
+                            <p>Локація: ${req.location} | Кількість: ${req.count} осіб</p>
+                            <p>Період: ${req.period}</p>
+                            ${req.assignedWorkers.length > 0 ? `<p><strong>Сформований персонал:</strong> ${req.assignedWorkers.join(', ')}</p>` : ''}
+                        </div>
+                        <span class="badge ${req.status === 'Закрита' ? 'badge-success' : 'badge-pending'}">${req.status}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // 2. Логика Менеджера
+        function renderManagerList() {
+            const list = document.getElementById('managerRequestsList');
+            list.innerHTML = '';
+            state.requests.forEach(req => {
+                list.innerHTML += `
+                    <div class="card">
+                        <div class="card-info">
+                            <strong>Заявка #${req.id} - ${req.position}</strong> <span class="badge badge-info">${req.type}</span>
+                            <p>Локація: ${req.location} | Потрібно: ${req.count} осіб</p>
+                            <p>Статус: <strong>${req.status}</strong></p>
+                            <p>Знайдено кандидатів: ${req.assignedWorkers.length} / ${req.count}</p>
+                        </div>
+                        <div>
+                            ${req.status !== 'Закрита' ? `<button class="btn-action" style="width:auto;" onclick="closeRequest(${req.id})">Закрити заявку (Сформувати)</button>` : '<span class="badge badge-success">Завершено</span>'}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function closeRequest(id) {
+            const req = state.requests.find(r => r.id === id);
+            if (req) {
+                req.status = 'Закрита';
+                if(req.assignedWorkers.length === 0) {
+                    req.assignedWorkers.push("Сидоренко Сергій (063 345 67 89)", "Коваленко Марія (050 456 78 90)");
+                }
+                renderManagerList();
+            }
+        }
+
+        // 3. Логика Исполнителя
+        function renderWorkerList() {
+            const availList = document.getElementById('workerAvailableList');
+            const myReservesList = document.getElementById('workerMyReservesList');
+            
+            availList.innerHTML = '';
+            myReservesList.innerHTML = '';
+
+            state.requests.filter(r => r.status !== 'Закрита').forEach(req => {
+                availList.innerHTML += `
+                    <div class="card">
+                        <div class="card-info">
+                            <strong>${req.location} - ${req.position}</strong>
+                            <p>Потрібно: ${req.count} осіб</p>
+                        </div>
+                        <button class="btn-secondary" onclick="applyWorker(${req.id})">Відгукнутися</button>
+                    </div>
+                `;
+            });
+
+            state.workerResponses.forEach(res => {
+                myReservesList.innerHTML += `
+                    <div class="card">
+                        <div class="card-info">
+                            <strong>Заявка #${res.reqId} - ${res.position}</strong>
+                            <p>Локація: ${res.location}</p>
+                        </div>
+                        <span class="badge badge-success">Підтверджено</span>
+                    </div>
+                `;
+            });
+        }
+
+        function applyWorker(reqId) {
+            const req = state.requests.find(r => r.id === reqId);
+            if (req) {
+                state.workerResponses.push({
+                    reqId: req.id,
+                    position: req.position,
+                    location: req.location
+                });
+                alert(`Ви успішно відгукнулися на заявку #${reqId}`);
+                renderWorkerList();
+            }
+        }
+
+        // Инициализация первой страницы
+        renderClientList();
+    </script>
+</body>
+</html>
