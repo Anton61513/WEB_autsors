@@ -148,16 +148,17 @@
       <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Кабинет Менеджера</h2>
       <p class="text-sm text-slate-500 dark:text-slate-400">Управление складами Украины и списком доступа аутсорса.</p>
     </div>
-    <!-- Секция управления списком доступа для теста -->
+
+    <!-- Секция управления списком доступа -->
     <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
       <h3 class="font-bold text-slate-900 dark:text-white mb-3">Белый список Аутсорса (для проверки регистрации)</h3>
-      <div id="accessListDisplay" class="text-xs text-slate-600 dark:text-slate-300 space-y-1 mb-4">
-        <!-- По умолчанию добавим тестового сотрудника, чтобы вы могли проверить -->
+      <div id="accessListDisplay" class="text-xs text-slate-600 dark:text-slate-300 space-y-2 mb-4">
+        <!-- Сюда динамически рендерится список с кнопками удаления -->
       </div>
       <div class="flex gap-2">
-        <input type="text" id="addAccName" placeholder="ФИО" class="px-3 py-1.5 border rounded text-xs dark:bg-slate-800 dark:border-slate-700">
-        <input type="text" id="addAccPhone" placeholder="+380..." class="px-3 py-1.5 border rounded text-xs dark:bg-slate-800 dark:border-slate-700" value="+380991234567">
-        <button onclick="addOutsourceToList()" class="px-3 py-1.5 bg-indigo-600 text-white rounded text-xs">Добавить в список</button>
+        <input type="text" id="addAccName" placeholder="ФИО (например, Кирилл Лупан)" class="px-3 py-2 border rounded text-xs dark:bg-slate-800 dark:border-slate-700 flex-1">
+        <input type="text" id="addAccPhone" placeholder="Телефон (например, 0000000003)" class="px-3 py-2 border rounded text-xs dark:bg-slate-800 dark:border-slate-700 flex-1" value="">
+        <button onclick="addOutsourceToList()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-xs font-semibold transition">Добавить в список</button>
       </div>
     </div>
   </main>
@@ -177,8 +178,9 @@
   </main>
 
   <script>
-    // База данных разрешенных сотрудников аутсорса (тестовые данные)
+    // База данных разрешенных сотрудников аутсорса
     let outsourceAccessList = [
+      { name: "Кирилл Лупан", phone: "0000000003" },
       { name: "Иван Иванов", phone: "+380991234567" }
     ];
 
@@ -201,11 +203,11 @@
       const outsourceNotice = document.getElementById('outsourceNotice');
 
       if (role === 'outsource') {
-        accessCodeContainer.classList.add('hidden'); // Аутсорсу код доступа не нужен
-        outsourceNotice.classList.remove('hidden');  // Показываем желтую рамку
+        accessCodeContainer.classList.add('hidden'); 
+        outsourceNotice.classList.remove('hidden');  
       } else {
-        accessCodeContainer.classList.remove('hidden'); // Менеджеру и Админу нужен код
-        outsourceNotice.classList.add('hidden');    // Скрываем желтую рамку
+        accessCodeContainer.classList.remove('hidden'); 
+        outsourceNotice.classList.add('hidden');    
       }
     }
 
@@ -243,9 +245,10 @@
         }
       }
 
-      // Проверка для Аутсорса (строго по списку доступа менеджера)
+      // Проверка для Аутсорса (по строгому совпадению телефона с нормализацией)
       if (role === 'outsource') {
-        const found = outsourceAccessList.find(item => item.phone === phone);
+        const cleanInputPhone = phone.replace(/\D/g, '');
+        const found = outsourceAccessList.find(item => item.phone.replace(/\D/g, '') === cleanInputPhone);
         if (!found) {
           errBox.textContent = 'Ошибка: Ваш номер телефона не найден в списке доступа менеджера!';
           errBox.classList.remove('hidden');
@@ -253,7 +256,6 @@
         }
       }
 
-      // Если все проверки пройдены
       showCabinet(role, `${lastName} ${firstName}`);
     }
 
@@ -290,17 +292,36 @@
 
     function renderAccessList() {
       const container = document.getElementById('accessListDisplay');
-      container.innerHTML = outsourceAccessList.map(item => `<div>• ${item.name} — <code class="text-indigo-600">${item.phone}</code></div>`).join('');
+      if (outsourceAccessList.length === 0) {
+        container.innerHTML = '<p class="text-slate-400 italic">Список пуст</p>';
+        return;
+      }
+      container.innerHTML = outsourceAccessList.map((item, index) => `
+        <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-800/60 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
+          <span>• <strong>${item.name}</strong> — <code class="text-indigo-600 dark:text-indigo-400">${item.phone}</code></span>
+          <button onclick="removeOutsource(${index})" class="px-2 py-1 bg-rose-500/10 hover:bg-rose-500 text-rose-600 hover:text-white rounded text-xs transition">
+            <i class="fa-solid fa-trash"></i> Удалить
+          </button>
+        </div>
+      `).join('');
     }
 
     function addOutsourceToList() {
       const name = document.getElementById('addAccName').value.trim();
       const phone = document.getElementById('addAccPhone').value.trim();
-      if (!name || !phone) return alert('Заполните все поля');
+      if (!name || !phone) {
+        alert('Заполните ФИО и телефон!');
+        return;
+      }
       outsourceAccessList.push({ name, phone });
       renderAccessList();
       document.getElementById('addAccName').value = '';
-      alert('Сотрудник добавлен в список доступа!');
+      document.getElementById('addAccPhone').value = '';
+    }
+
+    function removeOutsource(index) {
+      outsourceAccessList.splice(index, 1);
+      renderAccessList();
     }
   </script>
 </body>
