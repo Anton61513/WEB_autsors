@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +7,12 @@
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
+
   <!-- FontAwesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Google Fonts -->
@@ -21,18 +27,21 @@
       height: 6px;
     }
     .custom-scrollbar::-webkit-scrollbar-track {
-      background: #f1f5f9;
+      background: rgba(0, 0, 0, 0.05);
     }
     .custom-scrollbar::-webkit-scrollbar-thumb {
       background: #cbd5e1;
       border-radius: 4px;
     }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #475569;
+    }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col antialiased">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col antialiased transition-colors duration-200">
 
   <!-- TOP HEADER (Visible when logged in) -->
-  <header id="appHeader" class="bg-slate-900 text-white shadow-md sticky top-0 z-30 hidden">
+  <header id="appHeader" class="bg-slate-900 dark:bg-slate-900 border-b dark:border-slate-800 text-white shadow-md sticky top-0 z-30 hidden">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       
       <div class="flex items-center space-x-3">
@@ -40,13 +49,27 @@
           <i class="fa-solid fa-users-gear text-lg"></i>
         </div>
         <div>
-          <h1 class="font-bold text-lg leading-tight tracking-tight">Портал Управления</h1>
+          <h1 class="font-bold text-lg leading-tight tracking-tight" data-i18n="portalTitle">Портал Управления</h1>
           <p id="headerRoleBadge" class="text-xs text-indigo-300 font-medium">Роль: Менеджер</p>
         </div>
       </div>
 
-      <div class="flex items-center space-x-4">
-        <div class="flex items-center space-x-3 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+      <div class="flex items-center space-x-3 sm:space-x-4">
+        <!-- Language Switcher in Header -->
+        <div class="flex bg-slate-800 p-1 rounded-lg border border-slate-700 text-xs font-semibold">
+          <button onclick="setLanguage('ru')" id="lang-ru-header" class="px-2 py-1 rounded transition text-white bg-indigo-600">RU</button>
+          <button onclick="setLanguage('uk')" id="lang-uk-header" class="px-2 py-1 rounded transition text-slate-400 hover:text-white">UK</button>
+          <button onclick="setLanguage('en')" id="lang-en-header" class="px-2 py-1 rounded transition text-slate-400 hover:text-white">EN</button>
+        </div>
+
+        <!-- Dark/Light Theme Toggle in Header -->
+        <button onclick="toggleTheme()" class="p-2 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg border border-slate-700 transition" title="Переключить тему">
+          <i class="fa-solid fa-sun dark:hidden"></i>
+          <i class="fa-solid fa-moon hidden dark:block text-indigo-300"></i>
+        </button>
+
+        <!-- User info -->
+        <div class="hidden sm:flex items-center space-x-2.5 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
           <div class="w-7 h-7 rounded-full bg-indigo-500 text-white flex items-center justify-center text-xs font-bold" id="userAvatar">
             ММ
           </div>
@@ -55,32 +78,57 @@
 
         <button onclick="logout()" class="px-3 py-1.5 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 rounded-lg text-xs font-medium transition flex items-center space-x-1.5">
           <i class="fa-solid fa-right-from-bracket"></i>
-          <span>Выйти</span>
+          <span data-i18n="logout">Выйти</span>
         </button>
       </div>
 
     </div>
   </header>
 
-  <!-- SCREEN 1: AUTHORIZATION / REGISTRATION SCREEN -->
-  <section id="authScreen" class="flex-1 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6 sm:p-8 my-8">
+  <!-- SCREEN 1: AUTHORIZATION / REGISTRATION SCREEN (SHOWN BY DEFAULT) -->
+  <section id="authScreen" class="flex-1 flex flex-col items-center justify-center p-4">
+    
+    <!-- Top Settings Bar on Auth Screen (Theme & Language) -->
+    <div class="w-full max-w-md flex justify-between items-center mb-4 px-1">
+      <div class="flex items-center space-x-1 text-xs font-semibold text-slate-500 dark:text-slate-400">
+        <i class="fa-solid fa-globe mr-1"></i>
+        <span>Язык / Language:</span>
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <!-- Language Switcher -->
+        <div class="flex bg-white dark:bg-slate-800 p-1 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 text-xs font-semibold">
+          <button onclick="setLanguage('ru')" id="lang-ru-auth" class="px-2.5 py-1 rounded-lg transition text-white bg-indigo-600 shadow-sm">RU</button>
+          <button onclick="setLanguage('uk')" id="lang-uk-auth" class="px-2.5 py-1 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-indigo-600">UK</button>
+          <button onclick="setLanguage('en')" id="lang-en-auth" class="px-2.5 py-1 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-indigo-600">EN</button>
+        </div>
+
+        <!-- Theme Toggle Switch -->
+        <button onclick="toggleTheme()" class="p-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-amber-500 dark:text-indigo-400 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm transition" title="Тема">
+          <i class="fa-solid fa-sun text-base dark:hidden"></i>
+          <i class="fa-solid fa-moon text-base hidden dark:block"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Auth Card -->
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 max-w-md w-full p-6 sm:p-8">
       
       <!-- Logo Header -->
       <div class="text-center mb-6">
-        <div class="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-200 text-2xl">
+        <div class="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-200 dark:shadow-none text-2xl">
           <i class="fa-solid fa-shield-halved"></i>
         </div>
-        <h2 class="text-2xl font-bold text-slate-900">Добро пожаловать</h2>
-        <p class="text-xs text-slate-500 mt-1">Войдите в аккаунт или пройдите регистрацию</p>
+        <h2 class="text-2xl font-bold text-slate-900 dark:text-white" data-i18n="welcome">Добро пожаловать</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1" data-i18n="authSub">Войдите в аккаунт или пройдите регистрацию</p>
       </div>
 
       <!-- Auth Tabs Switcher (Вход / Регистрация) -->
-      <div class="bg-slate-100 p-1 rounded-xl flex mb-6 text-sm font-medium">
-        <button id="btnAuthLogin" onclick="setAuthMode('login')" class="flex-1 py-2 rounded-lg text-center transition-all bg-white text-indigo-600 shadow-sm font-semibold">
+      <div class="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex mb-6 text-sm font-medium">
+        <button id="btnAuthLogin" onclick="setAuthMode('login')" class="flex-1 py-2 rounded-lg text-center transition-all bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm font-semibold" data-i18n="loginTab">
           Вход
         </button>
-        <button id="btnAuthRegister" onclick="setAuthMode('register')" class="flex-1 py-2 rounded-lg text-center transition-all text-slate-600 hover:text-slate-900">
+        <button id="btnAuthRegister" onclick="setAuthMode('register')" class="flex-1 py-2 rounded-lg text-center transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white" data-i18n="regTab">
           Регистрация
         </button>
       </div>
@@ -88,40 +136,40 @@
       <!-- FORM 1: LOGIN -->
       <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Выберите вашу роль</label>
-          <select id="loginRole" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-            <option value="manager">Менеджер</option>
-            <option value="admin">Администратор</option>
-            <option value="outsource">Аутсорс</option>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1" data-i18n="selectRole">Выберите вашу роль</label>
+          <select id="loginRole" class="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <option value="manager" data-i18n="roleManager">Менеджер</option>
+            <option value="admin" data-i18n="roleAdmin">Администратор</option>
+            <option value="outsource" data-i18n="roleOutsource">Аутсорс</option>
           </select>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Телефон / Логин</label>
-          <input type="text" id="loginUsername" required placeholder="+7 (999) 000-00-00" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1" data-i18n="loginPhone">Телефон / Логин</label>
+          <input type="text" id="loginUsername" required placeholder="+7 (999) 000-00-00" class="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Пароль</label>
-          <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1" data-i18n="password">Пароль</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
         </div>
 
-        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition shadow-lg shadow-indigo-100 flex items-center justify-center space-x-2">
-          <span>Войти в аккаунт</span>
+        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition shadow-lg shadow-indigo-100 dark:shadow-none flex items-center justify-center space-x-2">
+          <span data-i18n="signInBtn">Войти в аккаунт</span>
           <i class="fa-solid fa-arrow-right text-xs"></i>
         </button>
 
         <!-- Quick Demo Login Buttons -->
-        <div class="pt-4 border-t border-slate-100">
-          <p class="text-xs text-center text-slate-400 mb-2 font-medium">Быстрый демо-вход:</p>
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-800">
+          <p class="text-xs text-center text-slate-400 mb-2 font-medium" data-i18n="quickDemo">Быстрый демо-вход:</p>
           <div class="grid grid-cols-3 gap-2">
-            <button type="button" onclick="quickLogin('manager')" class="py-1.5 px-2 bg-slate-50 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 text-slate-600 text-xs rounded-lg font-medium transition">
+            <button type="button" onclick="quickLogin('manager')" class="py-1.5 px-2 bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-300 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded-lg font-medium transition" data-i18n="roleManager">
               Менеджер
             </button>
-            <button type="button" onclick="quickLogin('admin')" class="py-1.5 px-2 bg-slate-50 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 text-slate-600 text-xs rounded-lg font-medium transition">
+            <button type="button" onclick="quickLogin('admin')" class="py-1.5 px-2 bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-300 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded-lg font-medium transition" data-i18n="roleAdmin">
               Админ
             </button>
-            <button type="button" onclick="quickLogin('outsource')" class="py-1.5 px-2 bg-slate-50 hover:bg-indigo-50 hover:text-indigo-600 border border-slate-200 text-slate-600 text-xs rounded-lg font-medium transition">
+            <button type="button" onclick="quickLogin('outsource')" class="py-1.5 px-2 bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 hover:text-indigo-600 dark:hover:text-indigo-300 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded-lg font-medium transition" data-i18n="roleOutsource">
               Аутсорс
             </button>
           </div>
@@ -131,49 +179,49 @@
       <!-- FORM 2: REGISTRATION -->
       <form id="registerForm" onsubmit="handleRegister(event)" class="space-y-4 hidden">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Роль при регистрации</label>
-          <select id="regRole" onchange="toggleRegFields()" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none">
-            <option value="outsource">Аутсорс (требуется список доступа)</option>
-            <option value="admin">Администратор (требуется админ-код)</option>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1" data-i18n="regRoleLabel">Роль при регистрации</label>
+          <select id="regRole" onchange="toggleRegFields()" class="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <option value="outsource" data-i18n="roleOutsource">Аутсорс (требуется список доступа)</option>
+            <option value="admin" data-i18n="roleAdmin">Администратор (требуется админ-код)</option>
           </select>
         </div>
 
         <!-- Admin Code Field (Only shown for Admin) -->
         <div id="adminCodeContainer" class="hidden">
-          <label class="block text-xs font-semibold text-indigo-700 uppercase tracking-wider mb-1">Админ-код *</label>
-          <input type="text" id="regAdminCode" placeholder="Введите код (например: ADMIN123)" class="w-full px-3 py-2.5 border border-indigo-300 bg-indigo-50/50 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none font-mono">
-          <p class="text-[11px] text-slate-400 mt-1">Тестовый код: <code class="text-indigo-600 font-bold">ADMIN123</code></p>
+          <label class="block text-xs font-semibold text-indigo-700 dark:text-indigo-400 uppercase tracking-wider mb-1" data-i18n="adminCodeLabel">Админ-код *</label>
+          <input type="text" id="regAdminCode" placeholder="ADMIN123" class="w-full px-3 py-2.5 border border-indigo-300 dark:border-indigo-700 bg-indigo-50/50 dark:bg-slate-800 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none font-mono">
+          <p class="text-[11px] text-slate-400 mt-1">Тестовый код: <code class="text-indigo-600 dark:text-indigo-400 font-bold">ADMIN123</code></p>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Фамилия *</label>
-            <input type="text" id="regLastName" required placeholder="Петров" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1" data-i18n="lastName">Фамилия *</label>
+            <input type="text" id="regLastName" required placeholder="Петров" class="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Имя *</label>
-            <input type="text" id="regFirstName" required placeholder="Александр" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1" data-i18n="firstName">Имя *</label>
+            <input type="text" id="regFirstName" required placeholder="Александр" class="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Номер телефона *</label>
-          <input type="tel" id="regPhone" required placeholder="+7 (999) 123-45-67" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1" data-i18n="phone">Номер телефона *</label>
+          <input type="tel" id="regPhone" required placeholder="+7 (999) 123-45-67" class="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Создайте пароль *</label>
-          <input type="password" id="regPassword" required placeholder="••••••••" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1" data-i18n="createPassword">Создайте пароль *</label>
+          <input type="password" id="regPassword" required placeholder="••••••••" class="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
         </div>
 
-        <div id="outsourceNotice" class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 leading-relaxed">
-          <i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1"></i>
-          Для регистрации Аутсорс-сотрудника менеджер должен заранее внести ваши <b>Фамилию, Имя и Телефон</b> в «Список доступа».
+        <div id="outsourceNotice" class="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg text-xs text-amber-800 dark:text-amber-200 leading-relaxed">
+          <i class="fa-solid fa-triangle-exclamation text-amber-600 dark:text-amber-400 mr-1"></i>
+          <span data-i18n="outsourceNotice">Для регистрации Аутсорс-сотрудника менеджер должен заранее внести ваши Фамилию, Имя и Телефон в «Список доступа».</span>
         </div>
 
-        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition shadow-lg shadow-indigo-100 flex items-center justify-center space-x-2">
+        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition shadow-lg shadow-indigo-100 dark:shadow-none flex items-center justify-center space-x-2">
           <i class="fa-solid fa-user-plus text-xs"></i>
-          <span>Зарегистрироваться</span>
+          <span data-i18n="registerBtn">Зарегистрироваться</span>
         </button>
       </form>
 
@@ -184,58 +232,58 @@
   <main id="managerScreen" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 hidden">
 
     <!-- Navigation Tabs -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-1.5 mb-6 flex flex-wrap gap-1">
-      <button onclick="switchTab('adminTab')" id="tabBtn-adminTab" class="tab-btn flex-1 sm:flex-none px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 flex items-center justify-center space-x-2 bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-sm">
+    <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-1.5 mb-6 flex flex-wrap gap-1">
+      <button onclick="switchTab('adminTab')" id="tabBtn-adminTab" class="tab-btn flex-1 sm:flex-none px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 flex items-center justify-center space-x-2 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 shadow-sm">
         <i class="fa-solid fa-clipboard-list"></i>
-        <span>Заявки (Админка)</span>
+        <span data-i18n="tabAdmin">Заявки (Админка)</span>
         <span class="bg-indigo-600 text-white text-xs px-2 py-0.5 rounded-full font-bold ml-1.5" id="requestBadgeCount">3</span>
       </button>
 
-      <button onclick="switchTab('reserveTab')" id="tabBtn-reserveTab" class="tab-btn flex-1 sm:flex-none px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 flex items-center justify-center space-x-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+      <button onclick="switchTab('reserveTab')" id="tabBtn-reserveTab" class="tab-btn flex-1 sm:flex-none px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 flex items-center justify-center space-x-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white">
         <i class="fa-solid fa-calendar-check"></i>
-        <span>Резерв</span>
+        <span data-i18n="tabReserve">Резерв</span>
       </button>
 
-      <button onclick="switchTab('accessTab')" id="tabBtn-accessTab" class="tab-btn flex-1 sm:flex-none px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 flex items-center justify-center space-x-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+      <button onclick="switchTab('accessTab')" id="tabBtn-accessTab" class="tab-btn flex-1 sm:flex-none px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 flex items-center justify-center space-x-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white">
         <i class="fa-solid fa-user-plus"></i>
-        <span>Список доступа</span>
+        <span data-i18n="tabAccess">Список доступа</span>
       </button>
 
-      <button onclick="switchTab('outsourceTab')" id="tabBtn-outsourceTab" class="tab-btn flex-1 sm:flex-none px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 flex items-center justify-center space-x-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+      <button onclick="switchTab('outsourceTab')" id="tabBtn-outsourceTab" class="tab-btn flex-1 sm:flex-none px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 flex items-center justify-center space-x-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white">
         <i class="fa-solid fa-building-user"></i>
-        <span>Аутсорс</span>
+        <span data-i18n="tabOutsource">Аутсорс</span>
       </button>
     </div>
 
     <!-- TAB 1: АДМИНКА / ЗАЯВКИ НА СКЛАДЫ -->
     <section id="adminTab" class="tab-content space-y-6">
       
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
         <div>
-          <h2 class="text-xl font-bold text-slate-900">Запросы на склады</h2>
-          <p class="text-sm text-slate-500 mt-1">Просмотр и корректировка количества требуемых сотрудников на даты с учетом броней</p>
+          <h2 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="whRequests">Запросы на склады</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1" data-i18n="whRequestsSub">Просмотр и корректировка количества требуемых сотрудников на даты с учетом броней</p>
         </div>
         <div class="flex items-center space-x-2">
-          <input type="date" id="filterDate" class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" onchange="renderRequests()">
-          <button onclick="resetDateFilter()" class="text-xs text-slate-500 hover:text-indigo-600 underline px-2">Сбросить</button>
+          <input type="date" id="filterDate" class="bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" onchange="renderRequests()">
+          <button onclick="resetDateFilter()" class="text-xs text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 underline px-2" data-i18n="reset">Сбросить</button>
         </div>
       </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         <div class="overflow-x-auto custom-scrollbar">
           <table class="w-full text-left border-collapse text-sm">
             <thead>
-              <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-xs tracking-wider">
-                <th class="py-3.5 px-4 font-semibold">Склад</th>
-                <th class="py-3.5 px-4 font-semibold">Дата смены</th>
-                <th class="py-3.5 px-4 font-semibold text-center">Запрошено (чел)</th>
-                <th class="py-3.5 px-4 font-semibold text-center">Забронировано (Резерв)</th>
-                <th class="py-3.5 px-4 font-semibold text-center">Итоговое кол-во</th>
-                <th class="py-3.5 px-4 font-semibold text-center">Статус</th>
-                <th class="py-3.5 px-4 font-semibold text-right">Действие</th>
+              <tr class="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">
+                <th class="py-3.5 px-4 font-semibold" data-i18n="thWarehouse">Склад</th>
+                <th class="py-3.5 px-4 font-semibold" data-i18n="thDate">Дата смены</th>
+                <th class="py-3.5 px-4 font-semibold text-center" data-i18n="thRequested">Запрошено (чел)</th>
+                <th class="py-3.5 px-4 font-semibold text-center" data-i18n="thReserved">Забронировано (Резерв)</th>
+                <th class="py-3.5 px-4 font-semibold text-center" data-i18n="thFinal">Итоговое кол-во</th>
+                <th class="py-3.5 px-4 font-semibold text-center" data-i18n="thStatus">Статус</th>
+                <th class="py-3.5 px-4 font-semibold text-right" data-i18n="thAction">Действие</th>
               </tr>
             </thead>
-            <tbody id="requestsTableBody" class="divide-y divide-slate-200">
+            <tbody id="requestsTableBody" class="divide-y divide-slate-200 dark:divide-slate-800">
               <!-- Dynamically populated -->
             </tbody>
           </table>
@@ -245,31 +293,31 @@
 
     <!-- TAB 2: РЕЗЕРВ -->
     <section id="reserveTab" class="tab-content hidden space-y-6">
-      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 class="text-xl font-bold text-slate-900">Забронированные смены (Резерв)</h2>
-          <p class="text-sm text-slate-500 mt-1">Список сотрудников, забронировавших работу на конкретные даты</p>
+          <h2 class="text-xl font-bold text-slate-900 dark:text-white" data-i18n="reserveTitle">Забронированные смены (Резерв)</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1" data-i18n="reserveSub">Список сотрудников, забронировавших работу на конкретные даты</p>
         </div>
         <div class="flex items-center space-x-3">
-          <span class="text-xs font-semibold px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg">
-            <i class="fa-solid fa-user-check mr-1"></i> Всего в резерве: <span id="totalReservedCount">0</span>
+          <span class="text-xs font-semibold px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+            <i class="fa-solid fa-user-check mr-1"></i> <span data-i18n="totalReserved">Всего в резерве:</span> <span id="totalReservedCount">0</span>
           </span>
         </div>
       </div>
 
-      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         <div class="overflow-x-auto custom-scrollbar">
           <table class="w-full text-left border-collapse text-sm">
             <thead>
-              <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-xs tracking-wider">
-                <th class="py-3.5 px-4 font-semibold">Сотрудник</th>
-                <th class="py-3.5 px-4 font-semibold">Телефон</th>
-                <th class="py-3.5 px-4 font-semibold">Склад</th>
-                <th class="py-3.5 px-4 font-semibold">Забронированная дата</th>
-                <th class="py-3.5 px-4 font-semibold text-center">Статус</th>
+              <tr class="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">
+                <th class="py-3.5 px-4 font-semibold" data-i18n="thEmployee">Сотрудник</th>
+                <th class="py-3.5 px-4 font-semibold" data-i18n="phone">Телефон</th>
+                <th class="py-3.5 px-4 font-semibold" data-i18n="thWarehouse">Склад</th>
+                <th class="py-3.5 px-4 font-semibold" data-i18n="thDate">Забронированная дата</th>
+                <th class="py-3.5 px-4 font-semibold text-center" data-i18n="thStatus">Статус</th>
               </tr>
             </thead>
-            <tbody id="reserveTableBody" class="divide-y divide-slate-200">
+            <tbody id="reserveTableBody" class="divide-y divide-slate-200 dark:divide-slate-800">
               <!-- Dynamically populated -->
             </tbody>
           </table>
@@ -282,53 +330,53 @@
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         <!-- Form to Add Person to Access List -->
-        <div class="lg:col-span-1 bg-white p-6 rounded-xl border border-slate-200 shadow-sm h-fit">
-          <div class="flex items-center space-x-2 border-b border-slate-100 pb-4 mb-4">
-            <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center">
+        <div class="lg:col-span-1 bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm h-fit">
+          <div class="flex items-center space-x-2 border-b border-slate-100 dark:border-slate-800 pb-4 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
               <i class="fa-solid fa-user-plus"></i>
             </div>
             <div>
-              <h3 class="font-bold text-slate-900">Предоставить доступ</h3>
-              <p class="text-xs text-slate-500">Добавление человека из Аутсорса</p>
+              <h3 class="font-bold text-slate-900 dark:text-white" data-i18n="accessTitle">Предоставить доступ</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400" data-i18n="accessSub">Добавление человека из Аутсорса</p>
             </div>
           </div>
 
           <form id="accessForm" onsubmit="handleAddAccess(event)" class="space-y-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Фамилия *</label>
-              <input type="text" id="inputLastName" required placeholder="Петров" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1" data-i18n="lastName">Фамилия *</label>
+              <input type="text" id="inputLastName" required placeholder="Петров" class="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Имя *</label>
-              <input type="text" id="inputFirstName" required placeholder="Александр" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1" data-i18n="firstName">Имя *</label>
+              <input type="text" id="inputFirstName" required placeholder="Александр" class="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Номер телефона *</label>
-              <input type="tel" id="inputPhone" required placeholder="+7 (999) 123-45-67" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1" data-i18n="phone">Номер телефона *</label>
+              <input type="tel" id="inputPhone" required placeholder="+7 (999) 123-45-67" class="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             </div>
 
             <button type="submit" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm transition shadow flex items-center justify-center space-x-2">
               <i class="fa-solid fa-check"></i>
-              <span>Внести в список доступа</span>
+              <span data-i18n="btnAddToAccess">Внести в список доступа</span>
             </button>
           </form>
 
-          <div class="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-500 space-y-1">
-            <p class="font-medium text-slate-700"><i class="fa-solid fa-circle-info text-indigo-500 mr-1"></i> Как это работает:</p>
-            <p>После внесения данных сюда человек сможет успешно пройти регистрацию с ролью <b>«Аутсорс»</b>.</p>
+          <div class="mt-4 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-500 dark:text-slate-400 space-y-1">
+            <p class="font-medium text-slate-700 dark:text-slate-300"><i class="fa-solid fa-circle-info text-indigo-500 mr-1"></i> <span data-i18n="accessHowItWorks">Как это работает:</span></p>
+            <p data-i18n="accessExplanation">После внесения данных сюда человек сможет успешно пройти регистрацию с ролью «Аутсорс».</p>
           </div>
         </div>
 
         <!-- Access Allowed List Table -->
-        <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-          <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+        <div class="lg:col-span-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+          <div class="p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
             <div>
-              <h3 class="font-bold text-slate-900">Разрешенный доступ (Аутсорс)</h3>
-              <p class="text-xs text-slate-500 mt-0.5">Люди, имеющие право на регистрацию в системе</p>
+              <h3 class="font-bold text-slate-900 dark:text-white" data-i18n="allowedAccessTitle">Разрешенный доступ (Аутсорс)</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5" data-i18n="allowedAccessSub">Люди, имеющие право на регистрацию в системе</p>
             </div>
-            <span class="text-xs bg-slate-100 text-slate-600 font-semibold px-2.5 py-1 rounded-md border border-slate-200" id="accessCountBadge">
+            <span class="text-xs bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-semibold px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700" id="accessCountBadge">
               Записей: 0
             </span>
           </div>
@@ -336,15 +384,15 @@
           <div class="overflow-x-auto custom-scrollbar flex-1">
             <table class="w-full text-left border-collapse text-sm">
               <thead>
-                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase text-xs tracking-wider">
-                  <th class="py-3 px-4 font-semibold">ФИО</th>
-                  <th class="py-3 px-4 font-semibold">Номер телефона</th>
-                  <th class="py-3 px-4 font-semibold">Дата добавления</th>
-                  <th class="py-3 px-4 font-semibold text-center">Статус регистрации</th>
-                  <th class="py-3 px-4 font-semibold text-right">Действие</th>
+                <tr class="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 uppercase text-xs tracking-wider">
+                  <th class="py-3 px-4 font-semibold" data-i18n="thEmployee">ФИО</th>
+                  <th class="py-3 px-4 font-semibold" data-i18n="phone">Номер телефона</th>
+                  <th class="py-3 px-4 font-semibold" data-i18n="thDateAdded">Дата добавления</th>
+                  <th class="py-3 px-4 font-semibold text-center" data-i18n="thRegStatus">Статус регистрации</th>
+                  <th class="py-3 px-4 font-semibold text-right" data-i18n="thAction">Действие</th>
                 </tr>
               </thead>
-              <tbody id="accessTableBody" class="divide-y divide-slate-200">
+              <tbody id="accessTableBody" class="divide-y divide-slate-200 dark:divide-slate-800">
                 <!-- Dynamically populated -->
               </tbody>
             </table>
@@ -356,25 +404,25 @@
 
     <!-- TAB 4: АУТСОРС -->
     <section id="outsourceTab" class="tab-content hidden space-y-6">
-      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-        <h2 class="text-xl font-bold text-slate-900 mb-2">Обзор Аутсорс компаний и агентов</h2>
-        <p class="text-sm text-slate-500 mb-6">Информация по подрядчикам, задействованным на складах</p>
+      <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Обзор Аутсорс компаний и агентов</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Информация по подрядчикам, задействованным на складах</p>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
-            <div class="text-xs text-slate-500 uppercase font-semibold">Подключено агентов</div>
-            <div class="text-2xl font-bold text-slate-900 mt-1">12</div>
-            <div class="text-xs text-emerald-600 mt-1"><i class="fa-solid fa-arrow-up"></i> +2 на этой неделе</div>
+          <div class="p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl">
+            <div class="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">Подключено агентов</div>
+            <div class="text-2xl font-bold text-slate-900 dark:text-white mt-1">12</div>
+            <div class="text-xs text-emerald-600 dark:text-emerald-400 mt-1"><i class="fa-solid fa-arrow-up"></i> +2 на этой неделе</div>
           </div>
-          <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
-            <div class="text-xs text-slate-500 uppercase font-semibold">Выведено человек сегодня</div>
-            <div class="text-2xl font-bold text-indigo-600 mt-1">48 / 60</div>
-            <div class="text-xs text-slate-500 mt-1">Исполнение заявок 80%</div>
+          <div class="p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl">
+            <div class="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">Выведено человек сегодня</div>
+            <div class="text-2xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">48 / 60</div>
+            <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Исполнение заявок 80%</div>
           </div>
-          <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
-            <div class="text-xs text-slate-500 uppercase font-semibold">Средняя ставка</div>
-            <div class="text-2xl font-bold text-slate-900 mt-1">3 200 ₽ / смена</div>
-            <div class="text-xs text-slate-500 mt-1">Стандартный тариф</div>
+          <div class="p-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl">
+            <div class="text-xs text-slate-500 dark:text-slate-400 uppercase font-semibold">Средняя ставка</div>
+            <div class="text-2xl font-bold text-slate-900 dark:text-white mt-1">3 200 ₽ / смена</div>
+            <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">Стандартный тариф</div>
           </div>
         </div>
       </div>
@@ -384,13 +432,13 @@
 
   <!-- SCREEN 3: EMPTY ADMIN SCREEN (AFTER LOGIN) -->
   <main id="adminScreen" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-16 flex flex-col items-center justify-center hidden">
-    <div class="bg-white p-12 rounded-2xl border border-slate-200 shadow-sm text-center max-w-md w-full">
-      <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+    <div class="bg-white dark:bg-slate-900 p-12 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center max-w-md w-full">
+      <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
         <i class="fa-solid fa-user-shield"></i>
       </div>
-      <h2 class="text-xl font-bold text-slate-800">Кабинет Администратора</h2>
-      <p class="text-sm text-slate-500 mt-2">Вы успешно авторизовались как Администратор (вход по админ-коду).</p>
-      <div class="mt-6 p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-400">
+      <h2 class="text-xl font-bold text-slate-800 dark:text-white" data-i18n="adminCabinetTitle">Кабинет Администратора</h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mt-2" data-i18n="adminCabinetSub">Вы успешно авторизовались как Администратор (вход по админ-коду).</p>
+      <div class="mt-6 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-400" data-i18n="emptyPageNotice">
         Страница пустая согласно вашей конфигурации
       </div>
     </div>
@@ -398,13 +446,13 @@
 
   <!-- SCREEN 4: EMPTY OUTSOURCE SCREEN (AFTER LOGIN) -->
   <main id="outsourceScreen" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-16 flex flex-col items-center justify-center hidden">
-    <div class="bg-white p-12 rounded-2xl border border-slate-200 shadow-sm text-center max-w-md w-full">
-      <div class="w-16 h-16 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+    <div class="bg-white dark:bg-slate-900 p-12 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center max-w-md w-full">
+      <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
         <i class="fa-solid fa-id-badge"></i>
       </div>
-      <h2 class="text-xl font-bold text-slate-800">Кабинет Аутсорс-Сотрудника</h2>
-      <p class="text-sm text-slate-500 mt-2">Вы вошли как сотрудника Аутсорса (проверка по списку доступа пройдна).</p>
-      <div class="mt-6 p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-400">
+      <h2 class="text-xl font-bold text-slate-800 dark:text-white" data-i18n="outsourceCabinetTitle">Кабинет Аутсорс-Сотрудника</h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mt-2" data-i18n="outsourceCabinetSub">Вы вошли как сотрудник Аутсорса (проверка по списку доступа пройдена).</p>
+      <div class="mt-6 p-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-lg text-xs text-slate-400" data-i18n="emptyPageNotice">
         Страница пустая согласно вашей конфигурации
       </div>
     </div>
@@ -412,44 +460,43 @@
 
   <!-- MODAL: EDIT REQUEST COUNT -->
   <div id="editModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-        <h3 class="text-lg font-bold text-slate-900">Изменить количество человек</h3>
-        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 text-lg">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 max-w-md w-full p-6">
+      <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3 mb-4">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white" data-i18n="editModalTitle">Изменить количество человек</h3>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-500 uppercase">Склад</label>
-          <div id="modalWarehouseName" class="font-bold text-slate-800 text-base mt-0.5">--</div>
+          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase" data-i18n="thWarehouse">Склад</label>
+          <div id="modalWarehouseName" class="font-bold text-slate-800 dark:text-slate-100 text-base mt-0.5">--</div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-500 uppercase">Дата смены</label>
-          <div id="modalShiftDate" class="text-slate-700 text-sm mt-0.5">--</div>
+          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase" data-i18n="thDate">Дата смены</label>
+          <div id="modalShiftDate" class="text-slate-700 dark:text-slate-300 text-sm mt-0.5">--</div>
         </div>
 
-        <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-800 flex items-start space-x-2">
-          <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+        <div class="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg text-xs text-amber-800 dark:text-amber-200 flex items-start space-x-2">
+          <i class="fa-solid fa-triangle-exclamation text-amber-600 dark:text-amber-400 mt-0.5"></i>
           <div>
-            Забронировано людей в резерве на эту дату: <b id="modalReservedCount">0</b> чел.
-            Рекомендуется не ставить итоговое число меньше резерва.
+            <span data-i18n="modalReservedNotice">Забронировано людей в резерве на эту дату:</span> <b id="modalReservedCount">0</b> <span data-i18n="modalRecommendNotice">чел. Рекомендуется не ставить итоговое число меньше резерва.</span>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Итоговое количество сотрудников</label>
-          <input type="number" id="modalInputCount" min="0" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-base font-semibold text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1" data-i18n="modalFinalCount">Итоговое количество сотрудников</label>
+          <input type="number" id="modalInputCount" min="0" class="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-base font-semibold text-slate-900 dark:text-white bg-white dark:bg-slate-800 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
         </div>
       </div>
 
       <div class="mt-6 flex justify-end space-x-3">
-        <button onclick="closeEditModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition">
+        <button onclick="closeEditModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-medium rounded-lg transition" data-i18n="btnCancel">
           Отмена
         </button>
-        <button onclick="saveRequestCount()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition shadow">
+        <button onclick="saveRequestCount()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition shadow" data-i18n="btnSave">
           Сохранить изменения
         </button>
       </div>
@@ -457,36 +504,276 @@
   </div>
 
   <!-- TOAST NOTIFICATION -->
-  <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-lg border border-slate-700 flex items-center space-x-3 transition-all duration-300 transform translate-y-20 opacity-0">
+  <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-4 py-3 rounded-xl shadow-lg border border-slate-700 dark:border-slate-200 flex items-center space-x-3 transition-all duration-300 transform translate-y-20 opacity-0">
     <i class="fa-solid fa-circle-check text-emerald-400 text-lg" id="toastIcon"></i>
     <span class="text-sm font-medium" id="toastMessage">Сохранено</span>
   </div>
 
-  <!-- JAVASCRIPT APP LOGIC -->
+  <!-- JAVASCRIPT APP LOGIC & TRANSLATIONS -->
   <script>
-    // DATA STORES
+    // I18N DICTIONARY
+    const translations = {
+      ru: {
+        portalTitle: "Портал Управления",
+        roleManager: "Менеджер",
+        roleAdmin: "Администратор",
+        roleOutsource: "Аутсорс",
+        logout: "Выйти",
+        welcome: "Добро пожаловать",
+        authSub: "Войдите в аккаунт или пройдите регистрацию",
+        loginTab: "Вход",
+        regTab: "Регистрация",
+        selectRole: "Выберите вашу роль",
+        loginPhone: "Телефон / Логин",
+        password: "Пароль",
+        signInBtn: "Войти в аккаунт",
+        quickDemo: "Быстрый демо-вход:",
+        regRoleLabel: "Роль при регистрации",
+        adminCodeLabel: "Админ-код *",
+        lastName: "Фамилия *",
+        firstName: "Имя *",
+        phone: "Номер телефона *",
+        createPassword: "Создайте пароль *",
+        outsourceNotice: "Для регистрации Аутсорс-сотрудника менеджер должен заранее внести ваши Фамилию, Имя и Телефон в «Список доступа».",
+        registerBtn: "Зарегистрироваться",
+        tabAdmin: "Заявки (Админка)",
+        tabReserve: "Резерв",
+        tabAccess: "Список доступа",
+        tabOutsource: "Аутсорс",
+        whRequests: "Запросы на склады",
+        whRequestsSub: "Просмотр и корректировка количества требуемых сотрудников на даты с учетом броней",
+        reset: "Сбросить",
+        thWarehouse: "Склад",
+        thDate: "Дата смены",
+        thRequested: "Запрошено (чел)",
+        thReserved: "Забронировано (Резерв)",
+        thFinal: "Итоговое кол-во",
+        thStatus: "Статус",
+        thAction: "Действие",
+        btnChange: "Изменить",
+        emptyRequests: "Нет заявок на выбранную дату",
+        reserveTitle: "Забронированные смены (Резерв)",
+        reserveSub: "Список сотрудников, забронировавших работу на конкретные даты",
+        totalReserved: "Всего в резерве:",
+        thEmployee: "Сотрудник",
+        accessTitle: "Предоставить доступ",
+        accessSub: "Добавление человека из Аутсорса",
+        btnAddToAccess: "Внести в список доступа",
+        accessHowItWorks: "Как это работает:",
+        accessExplanation: "После внесения данных сюда человек сможет успешно пройти регистрацию с ролью «Аутсорс».",
+        allowedAccessTitle: "Разрешенный доступ (Аутсорс)",
+        allowedAccessSub: "Люди, имеющие право на регистрацию в системе",
+        thDateAdded: "Дата добавления",
+        thRegStatus: "Статус регистрации",
+        registered: "Зарегистрирован",
+        pendingReg: "Ожидает регистрации",
+        emptyAccess: "Список доступа пуст",
+        adminCabinetTitle: "Кабинет Администратора",
+        adminCabinetSub: "Вы успешно авторизовались как Администратор (вход по админ-коду).",
+        outsourceCabinetTitle: "Кабинет Аутсорс-Сотрудника",
+        outsourceCabinetSub: "Вы вошли как сотрудник Аутсорса (проверка по списку доступа пройдена).",
+        emptyPageNotice: "Страница пустая согласно вашей конфигурации",
+        editModalTitle: "Изменить количество человек",
+        modalReservedNotice: "Забронировано людей в резерве на эту дату:",
+        modalRecommendNotice: "чел. Рекомендуется не ставить итоговое число меньше резерва.",
+        modalFinalCount: "Итоговое количество сотрудников",
+        btnCancel: "Отмена",
+        btnSave: "Сохранить изменения",
+        statusActive: "Активна",
+        statusFull: "Заполнена",
+        statusAdjusted: "Корректировка",
+        statusConfirmed: "Подтверждено",
+        statusPending: "В ожидании",
+        toastLoginSuccess: "Добро пожаловать",
+        toastLogout: "Вы вышли из системы",
+        toastInvalidAdminCode: "Неверный админ-код! Нельзя зарегистрироваться.",
+        toastNotInAccessList: "Ошибка! Вас нет в списке доступа менеджера.",
+        toastCountUpdated: "Количество изменено на:",
+        toastAccessAdded: "Доступ добавлен для",
+        toastAccessRevoked: "Доступ отозван"
+      },
+      uk: {
+        portalTitle: "Портал Управління",
+        roleManager: "Менеджер",
+        roleAdmin: "Адміністратор",
+        roleOutsource: "Аутсорс",
+        logout: "Вийти",
+        welcome: "Ласкаво просимо",
+        authSub: "Увійдіть в акаунт або пройдіть реєстрацію",
+        loginTab: "Вхід",
+        regTab: "Реєстрація",
+        selectRole: "Оберіть вашу роль",
+        loginPhone: "Телефон / Логін",
+        password: "Пароль",
+        signInBtn: "Увійти в акаунт",
+        quickDemo: "Швидкий демо-вхід:",
+        regRoleLabel: "Роль при реєстрації",
+        adminCodeLabel: "Адмін-код *",
+        lastName: "Прізвище *",
+        firstName: "Ім'я *",
+        phone: "Номер телефону *",
+        createPassword: "Створіть пароль *",
+        outsourceNotice: "Для реєстрації Аутсорс-співробітника менеджер повинен заздалегідь внести ваші Прізвище, Ім'я та Телефон у «Список доступу».",
+        registerBtn: "Зареєструватися",
+        tabAdmin: "Заявки (Адмінка)",
+        tabReserve: "Резерв",
+        tabAccess: "Список доступу",
+        tabOutsource: "Аутсорс",
+        whRequests: "Запити на склади",
+        whRequestsSub: "Перегляд та коригування кількості необхідних співробітників на дати з урахуванням броней",
+        reset: "Скинути",
+        thWarehouse: "Склад",
+        thDate: "Дата зміни",
+        thRequested: "Запитано (осіб)",
+        thReserved: "Заброньовано (Резерв)",
+        thFinal: "Підсумкова к-сть",
+        thStatus: "Статус",
+        thAction: "Дія",
+        btnChange: "Змінити",
+        emptyRequests: "Немає заявок на обрану дату",
+        reserveTitle: "Заброньовані зміни (Резерв)",
+        reserveSub: "Список співробітників, які забронювали роботу на конкретні дати",
+        totalReserved: "Всього в резерві:",
+        thEmployee: "Співробітник",
+        accessTitle: "Надати доступ",
+        accessSub: "Додавання особи з Аутсорсу",
+        btnAddToAccess: "Внести до списку доступу",
+        accessHowItWorks: "Як це працює:",
+        accessExplanation: "Після внесення даних сюди людина зможе успішно пройти реєстрацію з роллю «Аутсорс».",
+        allowedAccessTitle: "Дозволений доступ (Аутсорс)",
+        allowedAccessSub: "Люди, які мають право на реєстрацію в системі",
+        thDateAdded: "Дата додавання",
+        thRegStatus: "Статус реєстрації",
+        registered: "Зареєстрований",
+        pendingReg: "Очікує реєстрації",
+        emptyAccess: "Список доступу порожній",
+        adminCabinetTitle: "Кабінет Адміністратора",
+        adminCabinetSub: "Ви успішно авторизувалися як Адміністратор (вхід за адмін-кодом).",
+        outsourceCabinetTitle: "Кабінет Аутсорс-Співробітника",
+        outsourceCabinetSub: "Ви увійшли як співробітник Аутсорсу (перевірка за списком доступу пройдена).",
+        emptyPageNotice: "Сторінка порожня згідно з вашою конфігурацією",
+        editModalTitle: "Змінити кількість осіб",
+        modalReservedNotice: "Заброньовано людей у резерві на цю дату:",
+        modalRecommendNotice: "осіб. Рекомендується не ставити підсумкове число менше ніж резерв.",
+        modalFinalCount: "Підсумкова кількість співробітників",
+        btnCancel: "Скасувати",
+        btnSave: "Зберегти зміни",
+        statusActive: "Активна",
+        statusFull: "Заповнена",
+        statusAdjusted: "Коригування",
+        statusConfirmed: "Підтверджено",
+        statusPending: "В очікуванні",
+        toastLoginSuccess: "Ласкаво просимо",
+        toastLogout: "Ви вийшли з системи",
+        toastInvalidAdminCode: "Невірний адмін-код! Неможливо зареєструватися.",
+        toastNotInAccessList: "Помилка! Вас немає в списку доступу менеджера.",
+        toastCountUpdated: "Кількість змінено на:",
+        toastAccessAdded: "Доступ додано для",
+        toastAccessRevoked: "Доступ відкликано"
+      },
+      en: {
+        portalTitle: "Management Portal",
+        roleManager: "Manager",
+        roleAdmin: "Administrator",
+        roleOutsource: "Outsource",
+        logout: "Log out",
+        welcome: "Welcome",
+        authSub: "Log in to your account or register",
+        loginTab: "Sign In",
+        regTab: "Register",
+        selectRole: "Select your role",
+        loginPhone: "Phone / Username",
+        password: "Password",
+        signInBtn: "Sign In",
+        quickDemo: "Quick demo login:",
+        regRoleLabel: "Role for registration",
+        adminCodeLabel: "Admin Code *",
+        lastName: "Last Name *",
+        firstName: "First Name *",
+        phone: "Phone Number *",
+        createPassword: "Create Password *",
+        outsourceNotice: "To register an Outsource employee, the manager must first add your Last Name, First Name, and Phone to the 'Access List'.",
+        registerBtn: "Register",
+        tabAdmin: "Requests (Admin)",
+        tabReserve: "Reserve",
+        tabAccess: "Access List",
+        tabOutsource: "Outsource",
+        whRequests: "Warehouse Requests",
+        whRequestsSub: "View and adjust required staff counts for dates taking bookings into account",
+        reset: "Reset",
+        thWarehouse: "Warehouse",
+        thDate: "Shift Date",
+        thRequested: "Requested (pax)",
+        thReserved: "Reserved (Bookings)",
+        thFinal: "Final Count",
+        thStatus: "Status",
+        thAction: "Action",
+        btnChange: "Edit",
+        emptyRequests: "No requests for the selected date",
+        reserveTitle: "Booked Shifts (Reserve)",
+        reserveSub: "List of staff who booked shifts for specific dates",
+        totalReserved: "Total Reserved:",
+        thEmployee: "Employee",
+        accessTitle: "Grant Access",
+        accessSub: "Add an outsource employee",
+        btnAddToAccess: "Add to Access List",
+        accessHowItWorks: "How it works:",
+        accessExplanation: "Once added here, the user will be able to register successfully with the 'Outsource' role.",
+        allowedAccessTitle: "Allowed Access List (Outsource)",
+        allowedAccessSub: "Personnel eligible to register in the system",
+        thDateAdded: "Date Added",
+        thRegStatus: "Registration Status",
+        registered: "Registered",
+        pendingReg: "Pending Registration",
+        emptyAccess: "Access list is empty",
+        adminCabinetTitle: "Administrator Portal",
+        adminCabinetSub: "You logged in successfully as Administrator (via admin code).",
+        outsourceCabinetTitle: "Outsource Staff Portal",
+        outsourceCabinetSub: "You logged in as Outsource Staff (verified via access list).",
+        emptyPageNotice: "This page is empty according to your configuration",
+        editModalTitle: "Edit Required Count",
+        modalReservedNotice: "People reserved for this date:",
+        modalRecommendNotice: "pax. It is recommended not to set final count lower than reserved count.",
+        modalFinalCount: "Final Staff Count",
+        btnCancel: "Cancel",
+        btnSave: "Save Changes",
+        statusActive: "Active",
+        statusFull: "Filled",
+        statusAdjusted: "Adjusted",
+        statusConfirmed: "Confirmed",
+        statusPending: "Pending",
+        toastLoginSuccess: "Welcome",
+        toastLogout: "You logged out",
+        toastInvalidAdminCode: "Invalid Admin Code! Registration rejected.",
+        toastNotInAccessList: "Error! You are not in the manager's access list.",
+        toastCountUpdated: "Count updated to:",
+        toastAccessAdded: "Access granted for",
+        toastAccessRevoked: "Access revoked"
+      }
+    };
+
+    // APP STATE
+    let currentLang = 'ru';
     let currentEditingId = null;
     let currentUser = null;
 
-    // Default Admin Registration Secret Code
+    // Default Secret Admin Code
     const ADMIN_SECRET_CODE = 'ADMIN123';
 
-    // Warehouse Requests Data
+    // UPDATED WAREHOUSE DATA (Мурманская, Треугольник, ЕРЦ)
     let requestsData = [
-      { id: 1, warehouse: 'Склад №1 (Подольск Север)', date: '2026-09-28', originalNeeded: 25, reservedCount: 8, finalNeeded: 25, status: 'Активна' },
-      { id: 2, warehouse: 'Склад №3 (Домодедово)', date: '2026-09-29', originalNeeded: 15, reservedCount: 15, finalNeeded: 15, status: 'Заполнена' },
-      { id: 3, warehouse: 'Склад №2 (Восток Логистик)', date: '2026-09-30', originalNeeded: 40, reservedCount: 12, finalNeeded: 30, status: 'Корректировка' }
+      { id: 1, warehouse: 'Мурманская', date: '2026-09-28', originalNeeded: 25, reservedCount: 8, finalNeeded: 25, statusKey: 'statusActive' },
+      { id: 2, warehouse: 'Треугольник', date: '2026-09-29', originalNeeded: 15, reservedCount: 15, finalNeeded: 15, statusKey: 'statusFull' },
+      { id: 3, warehouse: 'ЕРЦ', date: '2026-09-30', originalNeeded: 40, reservedCount: 12, finalNeeded: 30, statusKey: 'statusAdjusted' }
     ];
 
-    // Reserve Data (Booked Shifts)
     let reserveData = [
-      { id: 101, name: 'Смирнов Алексей', phone: '+7 (916) 111-22-33', warehouse: 'Склад №1 (Подольск Север)', date: '2026-09-28', status: 'Подтверждено' },
-      { id: 102, name: 'Кузнецов Дмитрий', phone: '+7 (925) 444-55-66', warehouse: 'Склад №1 (Подольск Север)', date: '2026-09-28', status: 'Подтверждено' },
-      { id: 103, name: 'Михайлов Игорь', phone: '+7 (903) 777-88-99', warehouse: 'Склад №3 (Домодедово)', date: '2026-09-29', status: 'Подтверждено' },
-      { id: 104, name: 'Васильев Олег', phone: '+7 (915) 333-22-11', warehouse: 'Склад №2 (Восток Логистик)', date: '2026-09-30', status: 'В ожидании' }
+      { id: 101, name: 'Смирнов Алексей', phone: '+7 (916) 111-22-33', warehouse: 'Мурманская', date: '2026-09-28', statusKey: 'statusConfirmed' },
+      { id: 102, name: 'Кузнецов Дмитрий', phone: '+7 (925) 444-55-66', warehouse: 'Мурманская', date: '2026-09-28', statusKey: 'statusConfirmed' },
+      { id: 103, name: 'Михайлов Игорь', phone: '+7 (903) 777-88-99', warehouse: 'Треугольник', date: '2026-09-29', statusKey: 'statusConfirmed' },
+      { id: 104, name: 'Васильев Олег', phone: '+7 (915) 333-22-11', warehouse: 'ЕРЦ', date: '2026-09-30', statusKey: 'statusPending' }
     ];
 
-    // Outsource Access List Data (Added by Manager)
     let accessListData = [
       { id: 201, lastName: 'Петров', firstName: 'Александр', phone: '+7 (999) 123-45-67', addedDate: '2026-09-25', registered: true },
       { id: 202, lastName: 'Сидоров', firstName: 'Максим', phone: '+7 (988) 765-43-21', addedDate: '2026-09-25', registered: false }
@@ -494,12 +781,80 @@
 
     // INITIALIZATION
     document.addEventListener('DOMContentLoaded', () => {
+      // Ensure user starts at Auth screen
+      logout(false);
+      applyLanguage(currentLang);
       renderRequests();
       renderReserve();
       renderAccessList();
     });
 
-    // SWITCH AUTH MODES (Login vs Register)
+    // THEME SWITCHER
+    function toggleTheme() {
+      const htmlEl = document.documentElement;
+      if (htmlEl.classList.contains('dark')) {
+        htmlEl.classList.remove('dark');
+        htmlEl.classList.add('light');
+      } else {
+        htmlEl.classList.remove('light');
+        htmlEl.classList.add('dark');
+      }
+    }
+
+    // LANGUAGE SWITCHER
+    function setLanguage(lang) {
+      if (!translations[lang]) return;
+      currentLang = lang;
+      applyLanguage(lang);
+      renderRequests();
+      renderReserve();
+      renderAccessList();
+    }
+
+    function applyLanguage(lang) {
+      const dict = translations[lang];
+
+      // Update text for all elements with data-i18n attribute
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) {
+          el.innerText = dict[key];
+        }
+      });
+
+      // Update Language buttons highlight
+      ['ru', 'uk', 'en'].forEach(l => {
+        const authBtn = document.getElementById(`lang-${l}-auth`);
+        const headerBtn = document.getElementById(`lang-${l}-header`);
+        
+        const activeClassAuth = "px-2.5 py-1 rounded-lg transition text-white bg-indigo-600 shadow-sm";
+        const inactiveClassAuth = "px-2.5 py-1 rounded-lg transition text-slate-600 dark:text-slate-300 hover:text-indigo-600";
+
+        const activeClassHeader = "px-2 py-1 rounded transition text-white bg-indigo-600";
+        const inactiveClassHeader = "px-2 py-1 rounded transition text-slate-400 hover:text-white";
+
+        if (authBtn) authBtn.className = (l === lang) ? activeClassAuth : inactiveClassAuth;
+        if (headerBtn) headerBtn.className = (l === lang) ? activeClassHeader : inactiveClassHeader;
+      });
+
+      // Update dynamic role text in header if logged in
+      if (currentUser) {
+        updateHeaderUserBadge();
+      }
+    }
+
+    function updateHeaderUserBadge() {
+      if (!currentUser) return;
+      const dict = translations[currentLang];
+      const roleMap = {
+        manager: dict.roleManager,
+        admin: dict.roleAdmin,
+        outsource: dict.roleOutsource
+      };
+      document.getElementById('headerRoleBadge').innerText = `${dict.thStatus || 'Role'}: ${roleMap[currentUser.role] || currentUser.role}`;
+    }
+
+    // AUTH SWITCHING (LOGIN / REGISTER)
     function setAuthMode(mode) {
       const btnLogin = document.getElementById('btnAuthLogin');
       const btnReg = document.getElementById('btnAuthRegister');
@@ -507,20 +862,19 @@
       const regForm = document.getElementById('registerForm');
 
       if (mode === 'login') {
-        btnLogin.className = "flex-1 py-2 rounded-lg text-center transition-all bg-white text-indigo-600 shadow-sm font-semibold";
-        btnReg.className = "flex-1 py-2 rounded-lg text-center transition-all text-slate-600 hover:text-slate-900";
+        btnLogin.className = "flex-1 py-2 rounded-lg text-center transition-all bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm font-semibold";
+        btnReg.className = "flex-1 py-2 rounded-lg text-center transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
         loginForm.classList.remove('hidden');
         regForm.classList.add('hidden');
       } else {
-        btnReg.className = "flex-1 py-2 rounded-lg text-center transition-all bg-white text-indigo-600 shadow-sm font-semibold";
-        btnLogin.className = "flex-1 py-2 rounded-lg text-center transition-all text-slate-600 hover:text-slate-900";
+        btnReg.className = "flex-1 py-2 rounded-lg text-center transition-all bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm font-semibold";
+        btnLogin.className = "flex-1 py-2 rounded-lg text-center transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
         regForm.classList.remove('hidden');
         loginForm.classList.add('hidden');
         toggleRegFields();
       }
     }
 
-    // TOGGLE FIELDS IN REGISTRATION FORM
     function toggleRegFields() {
       const role = document.getElementById('regRole').value;
       const adminCodeBox = document.getElementById('adminCodeContainer');
@@ -535,26 +889,24 @@
       }
     }
 
-    // LOGIN HANDLER
+    // LOGIN / REGISTER LOGIC
     function handleLogin(e) {
       e.preventDefault();
       const role = document.getElementById('loginRole').value;
       const user = document.getElementById('loginUsername').value.trim() || 'Пользователь';
-
       loginUser(role, user);
     }
 
-    // QUICK LOGIN FOR TESTING
     function quickLogin(role) {
+      const dict = translations[currentLang];
       const names = {
-        manager: 'Маркова Анна (Менеджер)',
-        admin: 'Соколов Игорь (Админ)',
-        outsource: 'Петров Александр (Аутсорс)'
+        manager: `Маркова Анна (${dict.roleManager})`,
+        admin: `Соколов Игорь (${dict.roleAdmin})`,
+        outsource: `Петров Александр (${dict.roleOutsource})`
       };
       loginUser(role, names[role]);
     }
 
-    // LOG IN USER
     function loginUser(role, name) {
       currentUser = { role, name };
 
@@ -562,23 +914,17 @@
       document.getElementById('appHeader').classList.remove('hidden');
 
       document.getElementById('headerUserName').innerText = name;
-      
-      const roleLabels = {
-        manager: 'Роль: Менеджер',
-        admin: 'Роль: Администратор',
-        outsource: 'Роль: Аутсорс'
-      };
-      document.getElementById('headerRoleBadge').innerText = roleLabels[role] || role;
+      updateHeaderUserBadge();
 
       const avatarInitials = name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
       document.getElementById('userAvatar').innerText = avatarInitials || 'US';
 
-      // Hide all screens
+      // Hide all screens first
       document.getElementById('managerScreen').classList.add('hidden');
       document.getElementById('adminScreen').classList.add('hidden');
       document.getElementById('outsourceScreen').classList.add('hidden');
 
-      // Show appropriate screen
+      // Show relevant cabinet
       if (role === 'manager') {
         document.getElementById('managerScreen').classList.remove('hidden');
       } else if (role === 'admin') {
@@ -587,11 +933,10 @@
         document.getElementById('outsourceScreen').classList.remove('hidden');
       }
 
-      showToast(`Добро пожаловать, ${name}!`);
+      showToast(`${translations[currentLang].toastLoginSuccess}, ${name}!`);
     }
 
-    // LOGOUT HANDLER
-    function logout() {
+    function logout(showNotification = true) {
       currentUser = null;
       document.getElementById('appHeader').classList.add('hidden');
       document.getElementById('managerScreen').classList.add('hidden');
@@ -599,12 +944,14 @@
       document.getElementById('outsourceScreen').classList.add('hidden');
 
       document.getElementById('authScreen').classList.remove('hidden');
-      showToast('Вы вышли из системы');
+      if (showNotification) {
+        showToast(translations[currentLang].toastLogout);
+      }
     }
 
-    // REGISTER HANDLER
     function handleRegister(e) {
       e.preventDefault();
+      const dict = translations[currentLang];
 
       const role = document.getElementById('regRole').value;
       const lastName = document.getElementById('regLastName').value.trim();
@@ -614,12 +961,11 @@
       if (role === 'admin') {
         const code = document.getElementById('regAdminCode').value.trim();
         if (code !== ADMIN_SECRET_CODE) {
-          showToast('Неверный админ-код! Нельзя зарегистрироваться.', 'error');
+          showToast(dict.toastInvalidAdminCode, 'error');
           return;
         }
-        loginUser('admin', `${lastName} ${firstName} (Админ)`);
+        loginUser('admin', `${lastName} ${firstName} (${dict.roleAdmin})`);
       } else if (role === 'outsource') {
-        // CHECK IF PERSON IS IN MANAGER'S ACCESS LIST
         const cleanPhone = phone.replace(/\D/g, '');
         
         const match = accessListData.find(item => {
@@ -631,35 +977,36 @@
         });
 
         if (!match) {
-          showToast('Ошибка! Вас нет в списке доступа менеджера.', 'error');
+          showToast(dict.toastNotInAccessList, 'error');
           return;
         }
 
         match.registered = true;
         renderAccessList();
-        loginUser('outsource', `${lastName} ${firstName} (Аутсорс)`);
+        loginUser('outsource', `${lastName} ${firstName} (${dict.roleOutsource})`);
       }
     }
 
-    // TAB SWITCHING IN MANAGER VIEW
+    // MANAGER TABS
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.className = "tab-btn flex-1 sm:flex-none px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 flex items-center justify-center space-x-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900";
+        btn.className = "tab-btn flex-1 sm:flex-none px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 flex items-center justify-center space-x-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white";
       });
 
       document.getElementById(tabId).classList.remove('hidden');
 
       const activeBtn = document.getElementById('tabBtn-' + tabId);
       if (activeBtn) {
-        activeBtn.className = "tab-btn flex-1 sm:flex-none px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 flex items-center justify-center space-x-2 bg-indigo-50 text-indigo-700 border border-indigo-200 shadow-sm";
+        activeBtn.className = "tab-btn flex-1 sm:flex-none px-5 py-2.5 rounded-lg font-medium text-sm transition-all duration-150 flex items-center justify-center space-x-2 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 shadow-sm";
       }
     }
 
-    // RENDER TAB 1: REQUESTS
+    // RENDER TABLES
     function renderRequests() {
       const tbody = document.getElementById('requestsTableBody');
       const dateFilter = document.getElementById('filterDate').value;
+      const dict = translations[currentLang];
       tbody.innerHTML = '';
 
       let filtered = requestsData;
@@ -670,36 +1017,38 @@
       document.getElementById('requestBadgeCount').innerText = requestsData.length;
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400">Нет заявок на выбранную дату</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400">${dict.emptyRequests}</td></tr>`;
         return;
       }
 
       filtered.forEach(req => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50/80 transition-colors";
+        tr.className = "hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors";
 
-        let statusClass = "bg-blue-50 text-blue-700 border-blue-200";
+        let statusClass = "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800";
         if (req.finalNeeded === req.reservedCount) {
-          statusClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+          statusClass = "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800";
         } else if (req.finalNeeded !== req.originalNeeded) {
-          statusClass = "bg-purple-50 text-purple-700 border-purple-200";
+          statusClass = "bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800";
         }
 
+        const statusLabel = dict[req.statusKey] || req.statusKey;
+
         tr.innerHTML = `
-          <td class="py-3.5 px-4 font-semibold text-slate-900">${req.warehouse}</td>
-          <td class="py-3.5 px-4 text-slate-600">${formatDate(req.date)}</td>
-          <td class="py-3.5 px-4 text-center font-medium text-slate-500">${req.originalNeeded}</td>
-          <td class="py-3.5 px-4 text-center font-semibold text-emerald-600">${req.reservedCount} чел</td>
-          <td class="py-3.5 px-4 text-center font-bold text-slate-900 text-base">${req.finalNeeded} чел</td>
+          <td class="py-3.5 px-4 font-semibold text-slate-900 dark:text-slate-100">${req.warehouse}</td>
+          <td class="py-3.5 px-4 text-slate-600 dark:text-slate-400">${formatDate(req.date)}</td>
+          <td class="py-3.5 px-4 text-center font-medium text-slate-500 dark:text-slate-400">${req.originalNeeded}</td>
+          <td class="py-3.5 px-4 text-center font-semibold text-emerald-600 dark:text-emerald-400">${req.reservedCount}</td>
+          <td class="py-3.5 px-4 text-center font-bold text-slate-900 dark:text-slate-100 text-base">${req.finalNeeded}</td>
           <td class="py-3.5 px-4 text-center">
             <span class="px-2.5 py-1 text-xs font-semibold rounded-full border ${statusClass}">
-              ${req.status}
+              ${statusLabel}
             </span>
           </td>
           <td class="py-3.5 px-4 text-right">
-            <button onclick="openEditModal(${req.id})" class="px-3 py-1.5 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 rounded-lg text-xs font-medium transition border border-slate-200 inline-flex items-center space-x-1">
+            <button onclick="openEditModal(${req.id})" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 hover:text-indigo-600 dark:hover:text-indigo-300 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-medium transition border border-slate-200 dark:border-slate-700 inline-flex items-center space-x-1">
               <i class="fa-solid fa-pen-to-square"></i>
-              <span>Изменить</span>
+              <span>${dict.btnChange}</span>
             </button>
           </td>
         `;
@@ -712,7 +1061,6 @@
       renderRequests();
     }
 
-    // EDIT REQUEST MODAL LOGIC
     function openEditModal(id) {
       const request = requestsData.find(r => r.id === id);
       if (!request) return;
@@ -736,7 +1084,7 @@
 
       const newCount = parseInt(document.getElementById('modalInputCount').value, 10);
       if (isNaN(newCount) || newCount < 0) {
-        showToast('Введите корректное число', 'error');
+        showToast('Valid number required', 'error');
         return;
       }
 
@@ -744,37 +1092,39 @@
       if (request) {
         request.finalNeeded = newCount;
         if (request.finalNeeded !== request.originalNeeded) {
-          request.status = 'Скоректирована';
+          request.statusKey = 'statusAdjusted';
         }
         if (request.finalNeeded === request.reservedCount) {
-          request.status = 'Заполнена';
+          request.statusKey = 'statusFull';
         }
         renderRequests();
-        showToast(`Количество изменено на: ${newCount} чел.`);
+        showToast(`${translations[currentLang].toastCountUpdated} ${newCount}`);
       }
 
       closeEditModal();
     }
 
-    // RENDER TAB 2: RESERVE
     function renderReserve() {
       const tbody = document.getElementById('reserveTableBody');
+      const dict = translations[currentLang];
       tbody.innerHTML = '';
 
       document.getElementById('totalReservedCount').innerText = reserveData.length;
 
       reserveData.forEach(item => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50/80 transition-colors";
+        tr.className = "hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors";
+
+        const statusLabel = dict[item.statusKey] || item.statusKey;
 
         tr.innerHTML = `
-          <td class="py-3.5 px-4 font-semibold text-slate-900">${item.name}</td>
-          <td class="py-3.5 px-4 text-slate-600 font-mono text-xs">${item.phone}</td>
-          <td class="py-3.5 px-4 text-slate-700">${item.warehouse}</td>
-          <td class="py-3.5 px-4 text-slate-900 font-medium">${formatDate(item.date)}</td>
+          <td class="py-3.5 px-4 font-semibold text-slate-900 dark:text-slate-100">${item.name}</td>
+          <td class="py-3.5 px-4 text-slate-600 dark:text-slate-400 font-mono text-xs">${item.phone}</td>
+          <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300">${item.warehouse}</td>
+          <td class="py-3.5 px-4 text-slate-900 dark:text-slate-100 font-medium">${formatDate(item.date)}</td>
           <td class="py-3.5 px-4 text-center">
-            <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-              ${item.status}
+            <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              ${statusLabel}
             </span>
           </td>
         `;
@@ -782,33 +1132,33 @@
       });
     }
 
-    // RENDER TAB 3: ACCESS LIST (АУТСОРС)
     function renderAccessList() {
       const tbody = document.getElementById('accessTableBody');
+      const dict = translations[currentLang];
       tbody.innerHTML = '';
 
-      document.getElementById('accessCountBadge').innerText = `Записей: ${accessListData.length}`;
+      document.getElementById('accessCountBadge').innerText = `${dict.thAction || 'Count'}: ${accessListData.length}`;
 
       if (accessListData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">Список доступа пуст</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">${dict.emptyAccess}</td></tr>`;
         return;
       }
 
       accessListData.forEach(item => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50/80 transition-colors";
+        tr.className = "hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors";
 
         const statusBadge = item.registered
-          ? `<span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-check mr-1"></i> Зарегистрирован</span>`
-          : `<span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-clock mr-1"></i> Ожидает регистрации</span>`;
+          ? `<span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"><i class="fa-solid fa-check mr-1"></i> ${dict.registered}</span>`
+          : `<span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800"><i class="fa-solid fa-clock mr-1"></i> ${dict.pendingReg}</span>`;
 
         tr.innerHTML = `
-          <td class="py-3 px-4 font-semibold text-slate-900">${item.lastName} ${item.firstName}</td>
-          <td class="py-3 px-4 text-slate-600 font-mono text-xs">${item.phone}</td>
-          <td class="py-3 px-4 text-slate-500 text-xs">${formatDate(item.addedDate)}</td>
+          <td class="py-3 px-4 font-semibold text-slate-900 dark:text-slate-100">${item.lastName} ${item.firstName}</td>
+          <td class="py-3 px-4 text-slate-600 dark:text-slate-400 font-mono text-xs">${item.phone}</td>
+          <td class="py-3 px-4 text-slate-500 dark:text-slate-400 text-xs">${formatDate(item.addedDate)}</td>
           <td class="py-3 px-4 text-center">${statusBadge}</td>
           <td class="py-3 px-4 text-right">
-            <button onclick="removeAccess(${item.id})" class="text-slate-400 hover:text-rose-600 p-1 transition" title="Отозвать доступ">
+            <button onclick="removeAccess(${item.id})" class="text-slate-400 hover:text-rose-600 p-1 transition" title="Delete">
               <i class="fa-solid fa-trash-can"></i>
             </button>
           </td>
@@ -817,18 +1167,15 @@
       });
     }
 
-    // ADD ACCESS HANDLER
     function handleAddAccess(e) {
       e.preventDefault();
+      const dict = translations[currentLang];
 
       const lastName = document.getElementById('inputLastName').value.trim();
       const firstName = document.getElementById('inputFirstName').value.trim();
       const phone = document.getElementById('inputPhone').value.trim();
 
-      if (!lastName || !firstName || !phone) {
-        showToast('Заполните все поля', 'error');
-        return;
-      }
+      if (!lastName || !firstName || !phone) return;
 
       const newItem = {
         id: Date.now(),
@@ -843,17 +1190,15 @@
       renderAccessList();
 
       document.getElementById('accessForm').reset();
-      showToast(`Доступ для ${lastName} ${firstName} добавлен`);
+      showToast(`${dict.toastAccessAdded} ${lastName} ${firstName}`);
     }
 
-    // REMOVE ACCESS
     function removeAccess(id) {
       accessListData = accessListData.filter(a => a.id !== id);
       renderAccessList();
-      showToast('Доступ отозван');
+      showToast(translations[currentLang].toastAccessRevoked);
     }
 
-    // HELPER: DATE FORMATTER
     function formatDate(dateStr) {
       if (!dateStr) return '';
       const parts = dateStr.split('-');
@@ -863,7 +1208,6 @@
       return dateStr;
     }
 
-    // HELPER: TOAST
     function showToast(msg, type = 'success') {
       const toast = document.getElementById('toast');
       const toastMsg = document.getElementById('toastMessage');
@@ -887,5 +1231,3 @@
 </body>
 </html>
 ```eof
-
-Все взаимосвязи и сценарии регистрации/авторизации готовы и полностью работоспособны.
