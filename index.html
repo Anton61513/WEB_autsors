@@ -8,9 +8,7 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = {
-      darkMode: 'class',
-    }
+    tailwind.config = { darkMode: 'class' }
   </script>
 
   <!-- FontAwesome -->
@@ -40,6 +38,7 @@
         </div>
       </div>
       <div class="flex items-center space-x-3 sm:space-x-4">
+        <span class="text-xs text-slate-300" id="headerUserName">Антоний Ганчин</span>
         <button onclick="toggleTheme()" class="p-2 bg-slate-800 hover:bg-slate-700 text-amber-400 rounded-lg border border-slate-700 transition">
           <i class="fa-solid fa-sun dark:hidden"></i>
           <i class="fa-solid fa-moon hidden dark:block text-indigo-300"></i>
@@ -67,13 +66,13 @@
       <!-- Tabs Switcher -->
       <div class="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex mb-6 text-sm font-medium">
         <button id="btnAuthLogin" onclick="setAuthMode('login')" class="flex-1 py-2 rounded-lg text-center transition-all bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm font-semibold">Вход</button>
-        <button id="btnAuthRegister" onclick="setAuthMode('register')" class="flex-1 py-2 rounded-lg text-center transition-all text-slate-600 dark:text-slate-400 hover:text-white">Регистрация</button>
+        <button id="btnAuthRegister" onclick="setAuthMode('register')" class="flex-1 py-2 rounded-lg text-center transition-all text-slate-400 hover:text-white">Регистрация</button>
       </div>
 
       <!-- LOGIN FORM -->
       <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Выберите роль</label>
+          <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Роль</label>
           <select id="loginRole" class="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg text-sm bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none">
             <option value="manager">Менеджер</option>
             <option value="admin">Администратор</option>
@@ -132,10 +131,10 @@
         <!-- Желтая рамка выводится ТОЛЬКО при выборе Аутсорса -->
         <div id="outsourceNotice" class="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-lg text-xs text-amber-800 dark:text-amber-200 leading-relaxed hidden">
           <i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1"></i>
-          Для регистрации Аутсорс-сотрудника менеджер должен заранее внести ваши данные в список доступа.
+          Для регистрации Аутсорс-сотрудника менеджер должен заранее внести ваши ФИО и телефон в список доступа.
         </div>
 
-        <div id="authErrorMsg" class="text-xs text-rose-500 font-medium hidden"></div>
+        <div id="authErrorMsg" class="p-3 bg-rose-50 border border-rose-200 rounded-lg text-xs text-rose-600 font-medium hidden"></div>
 
         <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl text-sm transition shadow-lg">Зарегистрироваться</button>
       </form>
@@ -143,15 +142,46 @@
     </div>
   </section>
 
-  <!-- MANAGER DASHBOARD -->
+  <!-- SCREENS FOR DIFFERENT ROLES -->
   <main id="managerScreen" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 hidden">
-    <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+    <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm mb-6">
       <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Кабинет Менеджера</h2>
-      <p class="text-sm text-slate-500 dark:text-slate-400">Интерфейс управления складами Украины и сотрудниками.</p>
+      <p class="text-sm text-slate-500 dark:text-slate-400">Управление складами Украины и списком доступа аутсорса.</p>
+    </div>
+    <!-- Секция управления списком доступа для теста -->
+    <div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <h3 class="font-bold text-slate-900 dark:text-white mb-3">Белый список Аутсорса (для проверки регистрации)</h3>
+      <div id="accessListDisplay" class="text-xs text-slate-600 dark:text-slate-300 space-y-1 mb-4">
+        <!-- По умолчанию добавим тестового сотрудника, чтобы вы могли проверить -->
+      </div>
+      <div class="flex gap-2">
+        <input type="text" id="addAccName" placeholder="ФИО" class="px-3 py-1.5 border rounded text-xs dark:bg-slate-800 dark:border-slate-700">
+        <input type="text" id="addAccPhone" placeholder="+380..." class="px-3 py-1.5 border rounded text-xs dark:bg-slate-800 dark:border-slate-700" value="+380991234567">
+        <button onclick="addOutsourceToList()" class="px-3 py-1.5 bg-indigo-600 text-white rounded text-xs">Добавить в список</button>
+      </div>
+    </div>
+  </main>
+
+  <main id="adminScreen" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-16 flex flex-col items-center justify-center hidden">
+    <div class="bg-white dark:bg-slate-900 p-12 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center max-w-md w-full">
+      <h2 class="text-xl font-bold text-slate-800 dark:text-white">Кабинет Администратора</h2>
+      <p class="text-sm text-slate-500 mt-2">Вы успешно авторизовались с кодом 222.</p>
+    </div>
+  </main>
+
+  <main id="outsourceScreen" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-16 flex flex-col items-center justify-center hidden">
+    <div class="bg-white dark:bg-slate-900 p-12 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm text-center max-w-md w-full">
+      <h2 class="text-xl font-bold text-slate-800 dark:text-white">Кабинет Аутсорс-Сотрудника</h2>
+      <p class="text-sm text-slate-500 mt-2">Вы успешно прошли проверку по списку доступа менеджера!</p>
     </div>
   </main>
 
   <script>
+    // База данных разрешенных сотрудников аутсорса (тестовые данные)
+    let outsourceAccessList = [
+      { name: "Иван Иванов", phone: "+380991234567" }
+    ];
+
     function toggleTheme() {
       document.documentElement.classList.toggle('dark');
     }
@@ -171,7 +201,7 @@
       const outsourceNotice = document.getElementById('outsourceNotice');
 
       if (role === 'outsource') {
-        accessCodeContainer.classList.add('hidden'); // Аутсорсу код не нужен
+        accessCodeContainer.classList.add('hidden'); // Аутсорсу код доступа не нужен
         outsourceNotice.classList.remove('hidden');  // Показываем желтую рамку
       } else {
         accessCodeContainer.classList.remove('hidden'); // Менеджеру и Админу нужен код
@@ -181,39 +211,96 @@
 
     function handleLogin(e) {
       e.preventDefault();
-      document.getElementById('authScreen').classList.add('hidden');
-      document.getElementById('appHeader').classList.remove('hidden');
-      document.getElementById('managerScreen').classList.remove('hidden');
+      const role = document.getElementById('loginRole').value;
+      showCabinet(role);
     }
 
     function handleRegister(e) {
       e.preventDefault();
       const role = document.getElementById('regRole').value;
       const code = document.getElementById('regAccessCode').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const lastName = document.getElementById('regLastName').value.trim();
+      const firstName = document.getElementById('regFirstName').value.trim();
       const errBox = document.getElementById('authErrorMsg');
       errBox.classList.add('hidden');
 
-      if (role === 'manager' && code !== '111') {
-        errBox.textContent = 'Неверный код доступа для Менеджера (нужен 111)';
-        errBox.classList.remove('hidden');
-        return;
-      }
-      if (role === 'admin' && code !== '222') {
-        errBox.textContent = 'Неверный код доступа для Администратора (нужен 222)';
-        errBox.classList.remove('hidden');
-        return;
+      // Проверка для Менеджера (код 111)
+      if (role === 'manager') {
+        if (code !== '111') {
+          errBox.textContent = 'Неверный код доступа для Менеджера (требуется 111)';
+          errBox.classList.remove('hidden');
+          return;
+        }
       }
 
-      // Успешно
+      // Проверка для Администратора (код 222)
+      if (role === 'admin') {
+        if (code !== '222') {
+          errBox.textContent = 'Неверный код доступа для Администратора (требуется 222)';
+          errBox.classList.remove('hidden');
+          return;
+        }
+      }
+
+      // Проверка для Аутсорса (строго по списку доступа менеджера)
+      if (role === 'outsource') {
+        const found = outsourceAccessList.find(item => item.phone === phone);
+        if (!found) {
+          errBox.textContent = 'Ошибка: Ваш номер телефона не найден в списке доступа менеджера!';
+          errBox.classList.remove('hidden');
+          return;
+        }
+      }
+
+      // Если все проверки пройдены
+      showCabinet(role, `${lastName} ${firstName}`);
+    }
+
+    function showCabinet(role, userName = "Пользователь") {
       document.getElementById('authScreen').classList.add('hidden');
       document.getElementById('appHeader').classList.remove('hidden');
-      document.getElementById('managerScreen').classList.remove('hidden');
+      
+      document.getElementById('managerScreen').classList.add('hidden');
+      document.getElementById('adminScreen').classList.add('hidden');
+      document.getElementById('outsourceScreen').classList.add('hidden');
+
+      document.getElementById('headerUserName').textContent = userName;
+
+      if (role === 'manager') {
+        document.getElementById('headerRoleBadge').textContent = 'Роль: Менеджер';
+        document.getElementById('managerScreen').classList.remove('hidden');
+        renderAccessList();
+      } else if (role === 'admin') {
+        document.getElementById('headerRoleBadge').textContent = 'Роль: Администратор';
+        document.getElementById('adminScreen').classList.remove('hidden');
+      } else if (role === 'outsource') {
+        document.getElementById('headerRoleBadge').textContent = 'Роль: Аутсорс';
+        document.getElementById('outsourceScreen').classList.remove('hidden');
+      }
     }
 
     function logout() {
       document.getElementById('appHeader').classList.add('hidden');
       document.getElementById('managerScreen').classList.add('hidden');
+      document.getElementById('adminScreen').classList.add('hidden');
+      document.getElementById('outsourceScreen').classList.add('hidden');
       document.getElementById('authScreen').classList.remove('hidden');
+    }
+
+    function renderAccessList() {
+      const container = document.getElementById('accessListDisplay');
+      container.innerHTML = outsourceAccessList.map(item => `<div>• ${item.name} — <code class="text-indigo-600">${item.phone}</code></div>`).join('');
+    }
+
+    function addOutsourceToList() {
+      const name = document.getElementById('addAccName').value.trim();
+      const phone = document.getElementById('addAccPhone').value.trim();
+      if (!name || !phone) return alert('Заполните все поля');
+      outsourceAccessList.push({ name, phone });
+      renderAccessList();
+      document.getElementById('addAccName').value = '';
+      alert('Сотрудник добавлен в список доступа!');
     }
   </script>
 </body>
